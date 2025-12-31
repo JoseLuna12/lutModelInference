@@ -1,0 +1,31 @@
+[project]
+name = "lutinferencemodel"
+version = "0.1.0"
+description = "Standalone LUT inference package (EfficientNet->PCA weights->3D LUT)"
+readme = "README.md"
+authors = [
+    { name = "José Luna", email = "pepejose@outlook.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "numpy",
+    "pillow",
+    "torch",
+    "torchvision",
+    "lutcore @ git+https://github.com/JoseLuna12/lut_processing_lib.git",
+]
+
+[project.scripts]
+lutinferencemodel = "lutinferencemodel.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.9.15,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.sources]
+lutcore = { git = "https://github.com/JoseLuna12/lut_processing_lib.git" }
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]
