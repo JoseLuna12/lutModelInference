@@ -53,6 +53,7 @@ Examples:
 ## Python API usage
 ```python
 from lutinferencemodel import Predictor, load_image_float
+from lutinferencemodel import save_preview_image
 
 pred = Predictor()  # uses packaged artifacts by default
 result = pred.predict("path/to/image.png", apply_lut=True)
@@ -68,9 +69,8 @@ _, weights_only = pred.save_outputs("path/to/image.png", result, output_dir="out
 # Save only LUT
 lut_only, _ = pred.save_outputs("path/to/image.png", result, output_dir="outputs", save_weights=False)
 
-# Save preview image yourself
-from PIL import Image
-Image.fromarray((applied * 255).clip(0, 255).astype("uint8")).save("outputs/target_preview.png")
+# Save preview image using built-in helper
+save_preview_image(applied, "outputs/target_preview.png")
 ```
 
 ## Tests

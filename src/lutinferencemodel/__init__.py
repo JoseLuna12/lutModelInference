@@ -3,6 +3,7 @@ from .predictor import (
     PredictionResult,
     denorm_weights,
     load_image_float,
+    save_preview_image,
     select_device,
     weights_to_lut,
 )
@@ -12,6 +13,7 @@ __all__ = [
     "PredictionResult",
     "denorm_weights",
     "load_image_float",
+    "save_preview_image",
     "select_device",
     "weights_to_lut",
 ]

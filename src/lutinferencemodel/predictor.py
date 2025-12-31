@@ -115,6 +115,16 @@ def load_image_float(image: ImageLike) -> np.ndarray:
     return _as_float_hwc(image)
 
 
+def save_preview_image(applied_image: np.ndarray, path: Path | str) -> Path:
+    """
+    Save an applied LUT result (float32 HWC [0,1]) to disk as a PNG.
+    """
+    arr = np.clip(applied_image * 255.0, 0, 255).astype(np.uint8)
+    out_path = Path(path)
+    Image.fromarray(arr).save(out_path)
+    return out_path
+
+
 @dataclass
 class PredictionResult:
     lut: LUT
