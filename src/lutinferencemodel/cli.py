@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 from typing import Optional
 
@@ -38,10 +39,23 @@ def run(image: Path, args) -> None:
         pretrained_backbone=False,
     )
     result: PredictionResult = predictor.predict(image, apply_lut=not args.no_apply)
-    lut_path, weights_path = predictor.save_outputs(image, result, output_dir=args.out)
+    lut_path = weights_path = None
+    if args.save_lut or args.save_weights:
+        lut_path, weights_path = predictor.save_outputs(
+            image,
+            result,
+            output_dir=args.out,
+            save_lut=args.save_lut,
+            save_weights=args.save_weights,
+        )
 
-    print(f"Saved LUT      -> {lut_path}")
-    print(f"Saved weights  -> {weights_path}")
+    if args.save_lut and lut_path is not None:
+        print(f"Saved LUT      -> {lut_path}")
+    if args.save_weights and weights_path is not None:
+        print(f"Saved weights  -> {weights_path}")
+    if args.print_weights:
+        print(json.dumps({"weights": result.weights.tolist()}))
+
     print(f"Weights shape  -> {result.weights.shape}")
     if result.applied_image is not None and args.preview:
         preview_path = Path(args.out) / f"{image.stem}_preview.png"
@@ -60,8 +74,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--weight-norm", type=Path, default=None, help="Override weight normalization path")
     p.add_argument("--vision-config", type=Path, default=None, help="Optional vision config JSON (defaults to EfficientNet-B0 settings)")
     p.add_argument("--device", type=_device_from_arg, default=None, help="Force device: cpu|cuda|mps (default: auto)")
+    p.add_argument("--no-lut", dest="save_lut", action="store_false", help="Skip writing LUT .cube output")
+    p.add_argument("--no-weights", dest="save_weights", action="store_false", help="Skip writing weights JSON")
+    p.add_argument("--print-weights", action="store_true", help="Print predicted weights (JSON) to stdout")
     p.add_argument("--no-apply", action="store_true", help="Skip applying LUT to produce preview array")
     p.add_argument("--preview", action="store_true", help="Save preview PNG with LUT applied (requires --no-apply off)")
+    p.set_defaults(save_lut=True, save_weights=True)
     return p
 
 

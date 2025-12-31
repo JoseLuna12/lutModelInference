@@ -43,3 +43,22 @@ def test_apply_predicted_lut_to_target(tmp_path, prediction):
     preview_path = tmp_path / "target_lut_preview.png"
     Image.fromarray(np.clip(applied * 255.0, 0, 255).astype(np.uint8)).save(preview_path)
     assert preview_path.exists()
+
+
+def test_save_outputs_respects_flags(tmp_path, predictor_cpu: Predictor, prediction):
+    # Only weights
+    lut_path, weights_path = predictor_cpu.save_outputs(
+        SOURCE_IMAGE, prediction, output_dir=tmp_path, save_lut=False, save_weights=True
+    )
+    assert lut_path is None
+    assert weights_path and weights_path.exists()
+
+    # Only LUT
+    lut_path2, weights_path2 = predictor_cpu.save_outputs(
+        SOURCE_IMAGE, prediction, output_dir=tmp_path, save_lut=True, save_weights=False
+    )
+    assert weights_path2 is None
+    assert lut_path2 and lut_path2.exists()
+
+    with pytest.raises(ValueError):
+        predictor_cpu.save_outputs(SOURCE_IMAGE, prediction, output_dir=tmp_path, save_lut=False, save_weights=False)

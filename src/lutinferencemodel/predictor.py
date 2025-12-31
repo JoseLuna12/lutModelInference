@@ -208,13 +208,27 @@ class Predictor:
         result: PredictionResult,
         *,
         output_dir: Path | str,
-    ) -> tuple[Path, Path]:
+        save_lut: bool = True,
+        save_weights: bool = True,
+    ) -> tuple[Path | None, Path | None]:
+        """
+        Persist LUT and/or weights to disk.
+        Returns (lut_path, weights_path), with entries set to None when saving is skipped.
+        """
+        if not save_lut and not save_weights:
+            raise ValueError("At least one of save_lut or save_weights must be True")
         out_dir = Path(output_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
         base = Path(image_path).stem
         lut_path = out_dir / f"{base}_pred.cube"
         weights_path = out_dir / f"{base}_weights.json"
-        result.lut.export(str(lut_path))
-        with weights_path.open("w") as f:
-            json.dump({"weights": result.weights.tolist()}, f, indent=2)
+        if save_lut:
+            result.lut.export(str(lut_path))
+        else:
+            lut_path = None
+        if save_weights:
+            with weights_path.open("w") as f:
+                json.dump({"weights": result.weights.tolist()}, f, indent=2)
+        else:
+            weights_path = None
         return lut_path, weights_path
